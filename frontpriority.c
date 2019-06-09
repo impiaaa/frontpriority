@@ -174,6 +174,13 @@ void handle_window_update(Display *display, Window root_window) {
     }
 }
 
+int error_handler(Display *display, XErrorEvent *event) {
+    char error[100] = {0};
+    XGetErrorText(display, event->error_code, error, sizeof(error));
+    fprintf(stderr, "X error: %s\n", error);
+    return 0;
+}
+
 void cleanup(int signum) {
     reset_last_priority();
     signal(signum, SIG_DFL);
@@ -194,6 +201,10 @@ int main(int argc, char** argv) {
     }
     
     Window root_window = XRootWindow(display, screen);
+    
+    // Don't want to exit on error
+    XSetErrorHandler(error_handler);
+    
     // Set up priority on the current window
     handle_window_update(display, root_window);
     
